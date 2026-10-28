@@ -30,7 +30,7 @@ package it.multicoredev.cf3b.bukkit;
 
 import it.multicoredev.cf3b.Config;
 import it.multicoredev.cf3b.Static;
-import it.multicoredev.mbcore.spigot.Text;
+import it.multicoredev.cf3b.TextFormatting;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -51,8 +51,6 @@ public class CustomF3Brand extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        Text.create(this);
-
         if (!getDataFolder().exists()) {
             if (!getDataFolder().mkdirs()) {
                 getLogger().severe(String.format("Cannot create %s folder.", getDescription().getName()));
@@ -80,17 +78,9 @@ public class CustomF3Brand extends JavaPlugin implements Listener {
         }
 
         PAPI = getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
-        if (PAPI) Text.get().send("<dark_green>PlaceholderAPI support enabled.", getServer().getConsoleSender());
+        if (PAPI) getServer().getConsoleSender().sendMessage(TextFormatting.parse("<dark_green>PlaceholderAPI support enabled."));
 
-        try {
-            brandUpdater = new BrandUpdater(this, config.f3Brand, config.updatePeriod);
-        } catch (ClassNotFoundException e) {
-            getLogger().severe(e.getMessage());
-            if (config.debug) e.printStackTrace();
-
-            onDisable();
-            return;
-        }
+        brandUpdater = new BrandUpdater(this, config.f3Brand, config.updatePeriod);
 
         getServer().getPluginManager().registerEvents(this, this);
         Objects.requireNonNull(getCommand("f3reload")).setExecutor(new ReloadCmd(this));
@@ -100,7 +90,6 @@ public class CustomF3Brand extends JavaPlugin implements Listener {
     public void onDisable() {
         if (brandUpdater != null) brandUpdater.stop();
         HandlerList.unregisterAll((Plugin) this);
-        Text.destroy();
     }
 
     @EventHandler

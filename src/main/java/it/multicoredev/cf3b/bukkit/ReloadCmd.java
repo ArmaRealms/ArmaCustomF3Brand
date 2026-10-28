@@ -28,7 +28,7 @@
 
 package it.multicoredev.cf3b.bukkit;
 
-import it.multicoredev.mbcore.spigot.Text;
+import it.multicoredev.cf3b.TextFormatting;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -47,7 +47,7 @@ public class ReloadCmd implements CommandExecutor {
         plugin.onEnable();
         plugin.brandUpdater().broadcast();
 
-        Text.get().send(plugin.config().reloadSuccess, sender);
+        sender.sendMessage(TextFormatting.parse(plugin.config().reloadSuccess));
         return true;
     }
 }

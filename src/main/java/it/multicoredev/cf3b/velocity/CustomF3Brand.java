@@ -48,7 +48,6 @@ import com.velocitypowered.proxy.VelocityServer;
 import com.velocitypowered.proxy.network.ConnectionManager;
 import it.multicoredev.cf3b.Config;
 import it.multicoredev.cf3b.Static;
-import it.multicoredev.mbcore.velocity.Text;
 import org.bstats.velocity.Metrics;
 import org.slf4j.Logger;
 
@@ -83,7 +82,6 @@ public class CustomF3Brand {
         this.logger = logger;
         this.dataDirectory = dataDirectory;
         this.metricsFactory = metricsFactory;
-        Text.create(proxy);
     }
 
     @Subscribe

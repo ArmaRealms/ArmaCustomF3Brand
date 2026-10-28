@@ -42,7 +42,7 @@ import com.velocitypowered.proxy.protocol.StateRegistry;
 import com.velocitypowered.proxy.protocol.packet.PluginMessagePacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import it.multicoredev.mbcore.velocity.Text;
+import it.multicoredev.cf3b.TextFormatting;
 
 import java.util.List;
 import java.util.Map;
@@ -91,7 +91,7 @@ public class BrandUpdater {
                 .replace("{server}", server != null ? server : "")
                 .replace("{name}", player.getUsername())
                 .replace("{displayname}", player.getUsername())
-                .replace("{spigot}", Text.toMiniMessage(server != null && serversBrand.containsKey(server) ? serversBrand.get(server) : ""));
+                .replace("{spigot}", TextFormatting.toMiniMessage(server != null && serversBrand.containsKey(server) ? serversBrand.get(server) : ""));
 
         try {
             MinecraftConnection connection = ((ConnectedPlayer) player).getConnection();
@@ -109,7 +109,7 @@ public class BrandUpdater {
 
 
             ByteBuf buf = Unpooled.buffer();
-            ProtocolUtils.writeString(buf, Text.toLegacyAlternateColorCodes(Text.toLegacyText(Text.toMiniMessage(str))) + "§r");
+            ProtocolUtils.writeString(buf, TextFormatting.toLegacy(str) + "§r");
             connection.write(new PluginMessagePacket(CustomF3Brand.BRAND_IDENTIFIER.getId(), buf));
             connection.flush();
         } catch (Throwable t) {

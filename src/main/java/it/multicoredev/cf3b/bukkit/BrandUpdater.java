@@ -32,43 +32,39 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.injector.netty.WirePacket;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import it.multicoredev.cf3b.Static;
-import it.multicoredev.mbcore.spigot.Text;
+import it.multicoredev.cf3b.TextFormatting;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 public class BrandUpdater {
     private final CustomF3Brand plugin;
     private final List<String> brand;
-    private final Class<?> pdscl;
     private final ProtocolManager manager;
     private int index = 0;
-    private ScheduledFuture<?> task;
-    private boolean packetDataSerializerError = false;
-    private boolean writeStringError = false;
+    private BukkitTask task;
+    private boolean packetError = false;
 
-    public BrandUpdater(CustomF3Brand plugin, List<String> brand, long period) throws ClassNotFoundException {
+    public BrandUpdater(CustomF3Brand plugin, List<String> brand, long period) {
         this.plugin = plugin;
         this.brand = brand;
         this.manager = ProtocolLibrary.getProtocolManager();
 
-        this.pdscl = Class.forName("net.minecraft.network.PacketDataSerializer");
-
-        if (brand.size() > 1) task = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new UpdateBrandTask(), period, period, TimeUnit.MILLISECONDS);
+        if (brand.size() > 1) {
+            long ticks = Math.max(1L, Math.ceilDiv(period, 50L));
+            task = Bukkit.getScheduler().runTaskTimer(plugin, new UpdateBrandTask(), ticks, ticks);
+        }
     }
 
     public void stop() {
         if (task != null) {
-            task.cancel(true);
+            task.cancel();
             task = null;
         }
     }
@@ -83,51 +79,38 @@ public class BrandUpdater {
                 .replace("{displayname}", player.getDisplayName());
         if (CustomF3Brand.PAPI) str = PlaceholderUtils.replacePlaceholders(str, player);
 
-        ByteBuf buf = getPacketDataSerializer();
-        if (buf == null) return;
-
-        if (!writeString(buf, Static.BRAND)) return;
-        if (!writeString(buf, Text.toLegacyAlternateColorCodes(Text.toLegacyText(Text.toMiniMessage(str))) + "§r")) return;
-
-        byte[] data = new byte[buf.readableBytes()];
-        for (int i = 0; i < data.length; i++) data[i] = buf.getByte(i);
-
         try {
+            byte[] data = createData(TextFormatting.toLegacy(str) + "§r");
             WirePacket customPacket = new WirePacket(PacketType.Play.Server.CUSTOM_PAYLOAD, data);
             manager.sendWirePacket(player, customPacket);
-        } catch (Throwable ignored) {
+        } catch (Exception e) {
+            if (!packetError) {
+                packetError = true;
+                plugin.getLogger().log(Level.WARNING, "Cannot send the F3 brand. Check ProtocolLib compatibility with your server.", e);
+            }
         }
     }
 
-    private ByteBuf getPacketDataSerializer() {
-        try {
-            Constructor<?> pdsco = pdscl.getConstructor(ByteBuf.class);
-            return (ByteBuf) pdsco.newInstance(Unpooled.buffer());
-        } catch (Throwable t) {
-            if (!packetDataSerializerError) {
-                packetDataSerializerError = true;
-                Text.get().send("<red>Cannot create PacketDataSerializer ByteBuf: " + t.getMessage() + "</red>", plugin.getServer().getConsoleSender());
-                if (plugin.config().debug) t.printStackTrace();
-            }
-
-            return null;
-        }
+    static byte[] createData(String brand) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        writeString(output, Static.BRAND);
+        writeString(output, brand);
+        return output.toByteArray();
     }
 
-    private boolean writeString(Object buf, String data) {
-        try {
-            Method writeString = pdscl.getDeclaredMethod("a", String.class);
-            writeString.invoke(buf, data);
-            return true;
-        } catch (Throwable t) {
-            if (!writeStringError) {
-                writeStringError = true;
-                Text.get().send("<red>Cannot write string to PacketDataSerializer: " + t.getMessage() + "</red>", plugin.getServer().getConsoleSender());
-                if (plugin.config().debug) t.printStackTrace();
-            }
-
-            return false;
+    private static void writeString(ByteArrayOutputStream output, String value) {
+        if (value.length() > 32767) {
+            throw new IllegalArgumentException("Brand strings cannot exceed 32767 characters");
         }
+
+        byte[] data = value.getBytes(StandardCharsets.UTF_8);
+        int length = data.length;
+        while ((length & ~0x7F) != 0) {
+            output.write((length & 0x7F) | 0x80);
+            length >>>= 7;
+        }
+        output.write(length);
+        output.writeBytes(data);
     }
 
     private class UpdateBrandTask implements Runnable {

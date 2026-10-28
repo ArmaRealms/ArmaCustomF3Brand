@@ -29,7 +29,7 @@
 package it.multicoredev.cf3b.velocity;
 
 import com.velocitypowered.api.command.SimpleCommand;
-import it.multicoredev.mbcore.velocity.Text;
+import it.multicoredev.cf3b.TextFormatting;
 
 public class ReloadCmd implements SimpleCommand {
     private final CustomF3Brand plugin;
@@ -44,7 +44,7 @@ public class ReloadCmd implements SimpleCommand {
         plugin.load();
         plugin.brandUpdater().broadcast();
 
-        Text.get().send(plugin.config().reloadSuccess, invocation.source());
+        invocation.source().sendMessage(TextFormatting.parse(plugin.config().reloadSuccess));
     }
 
     @Override

@@ -31,7 +31,7 @@ package it.multicoredev.cf3b.bungee;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.multicoredev.cf3b.Static;
-import it.multicoredev.mbcore.bungeecord.Text;
+import it.multicoredev.cf3b.TextFormatting;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -80,7 +80,7 @@ public class BrandUpdater implements Listener {
                 .replace("{server}", server != null ? server : "")
                 .replace("{name}", player.getName())
                 .replace("{displayname}", player.getDisplayName())
-                .replace("{spigot}", Text.toMiniMessage(server != null && serversBrand.containsKey(server) ? serversBrand.get(server) : ""));
+                .replace("{spigot}", TextFormatting.toMiniMessage(server != null && serversBrand.containsKey(server) ? serversBrand.get(server) : ""));
 
         player.sendData(Static.BRAND, createData(str));
     }
@@ -102,7 +102,7 @@ public class BrandUpdater implements Listener {
 
     public static byte[] createData(String str) {
         ByteBuf brand = Unpooled.buffer();
-        DefinedPacket.writeString(Text.toLegacyAlternateColorCodes(Text.toLegacyText(str)) + "§r", brand);
+        DefinedPacket.writeString(TextFormatting.toLegacy(str) + "§r", brand);
         byte[] data = DefinedPacket.toArray(brand);
         brand.release();
 
