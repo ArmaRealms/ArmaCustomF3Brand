@@ -6,24 +6,46 @@ Set your custom message or animation in the debug screen (F3) of your server. Yo
 it's easy and intuitive.
 
 ## Features
-- [x] Spigot version
+- [x] Paper version
     - PlaceholderAPI support
 - [x] Bungeecord version
 - [x] Velocity version
   - Velocity version is in alpha stage, please report any issue you find.
 
 ## Requirements
-- Minecraft 1.16+
-- Java 17+.
-- ProtocolLib is required for the Spigot version.
+- Paper 26.2 for the server implementation.
+- Java 25+ for all implementations.
+- A [ProtocolLib development build](https://github.com/dmulloy2/ProtocolLib/releases/tag/dev-build)
+  with Minecraft 26.2 support (currently 5.5.0-SNAPSHOT) is required on Paper.
+  The stable 5.4.0 release is used only as the compile-time API; it does not support 26.2 at runtime.
+- PlaceholderAPI 2.12.3 is optional on Paper.
+
+## Building
+
+Build with JDK 25 and Maven 3.9+:
+
+```bash
+mvn -U clean verify
+```
+
+The plugin JAR is `target/CustomF3Brand-1.2.1.jar`.
+The Paper dependency uses `[26.2.build.0,26.2.1)`, Maven's equivalent of
+`26.2.build.+`, excluding 26.3 prereleases, following the
+[MCPets reference commit](https://github.com/Nocsy-Workshop/mcpets/commit/1127c577e1e4de547a490b524a95a76ff28ccef4).
+The resolved build can change; inspect it with `mvn dependency:tree`.
+
+Text formatting uses Adventure 5 directly. The existing BungeeCord and Velocity
+implementations remain included; their behavior still needs to be verified on the
+proxy versions used in your network. Compilation and unit tests do not validate
+the F3 display or proxy packet interception in a running client.
 
 ## Installation
-Download the plugin from [here](https://modrinth.com/plugin/customf3brand) and put it in your plugins folder.
-If you are installing this plugin in a Spigot server download also [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/);
-That's it!
+Build this fork and put the generated JAR in your plugins folder.
+For Paper, also install the ProtocolLib build described above, then restart the server.
+The plugin name, configuration directory, commands and permissions are unchanged.
 
 ## Commands
-- ```/f3r``` to reload the config (spigot)
+- ```/f3r``` to reload the config (Paper)
 - ```/bf3r``` to reload the config (bungeecord)
 - ```/vf3r``` to reload the config (velocity)
 
@@ -31,6 +53,9 @@ That's it!
 - ```cf3.reload``` to reload the config
 
 ## Warnings
+- On Paper, `update_period` remains in milliseconds and is rounded up to whole server ticks
+  (50 ms at 20 TPS), with a minimum of one tick. Animations and PlaceholderAPI run on the
+  server thread. The default 100 ms interval is two ticks.
 - Do not reload the plugin in a velocity server! If you want to reload the config use the command ```/vf3r```.
 - The configuration file is a JSON file with json5 extension. This is done to allow comments in the file but is parsed as a json. 
 When editing the file make sure to follow the json syntax.

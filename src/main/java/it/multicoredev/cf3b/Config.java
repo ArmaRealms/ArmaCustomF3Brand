@@ -46,6 +46,7 @@ public class Config {
             "",
             "You can also set the update period (in milliseconds) of the brand message to make a more or less smooth animation.",
             "Lower values of the update period will make the animation faster. The default value is 100.",
+            "On Paper, the period is rounded up to server ticks (50 ms at 20 TPS), with a minimum of one tick.",
             "Lower values of the update period means that a lot more packets will be sent to each player, so be careful with this value.",
             "",
             "This plugin also support some placeholders that will be automatically replaced by the plugin with the correct value:",

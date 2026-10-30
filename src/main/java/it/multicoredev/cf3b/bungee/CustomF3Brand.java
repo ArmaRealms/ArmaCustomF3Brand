@@ -30,7 +30,6 @@ package it.multicoredev.cf3b.bungee;
 
 import it.multicoredev.cf3b.Config;
 import it.multicoredev.cf3b.Static;
-import it.multicoredev.mbcore.bungeecord.Text;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -47,8 +46,6 @@ public class CustomF3Brand extends Plugin implements Listener {
 
     @Override
     public void onEnable() {
-        Text.create(this);
-
         if (!getDataFolder().exists()) {
             if (!getDataFolder().mkdirs()) {
                 getLogger().severe(String.format("Cannot create %s folder.", getDescription().getName()));
@@ -86,7 +83,6 @@ public class CustomF3Brand extends Plugin implements Listener {
     public void onDisable() {
         if (brandUpdater != null) brandUpdater.stop();
         getProxy().getPluginManager().unregisterListeners(this);
-        Text.destroy();
     }
 
     @EventHandler

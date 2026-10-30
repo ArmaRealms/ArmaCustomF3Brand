@@ -28,10 +28,12 @@
 
 package it.multicoredev.cf3b.bungee;
 
-import it.multicoredev.mbcore.bungeecord.Text;
+import it.multicoredev.cf3b.TextFormatting;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.chat.ComponentSerializer;
 
 public class ReloadCmd extends Command {
     private final CustomF3Brand plugin;
@@ -47,6 +49,7 @@ public class ReloadCmd extends Command {
         plugin.onEnable();
         plugin.brandUpdater().broadcast();
 
-        Text.get().send(plugin.config().reloadSuccess, sender);
+        sender.sendMessage(ComponentSerializer.parse(GsonComponentSerializer.gson().serialize(
+                TextFormatting.parse(plugin.config().reloadSuccess))));
     }
 }

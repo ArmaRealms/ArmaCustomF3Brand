@@ -64,7 +64,7 @@ public class PacketListenerChannelInitializer extends BackendChannelInitializer 
     }
 
     @Override
-    protected void initChannel(Channel channel) throws Exception {
+    protected void initChannel(Channel channel) {
         try {
             if (channelInitializer != null && initMethod != null) initMethod.invoke(channelInitializer, channel);
         } catch (Exception e) {
